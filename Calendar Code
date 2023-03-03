@@ -1,0 +1,98 @@
+#Leap Year
+def leap_year(y):
+    if y % 400 == 0:
+        return 1
+    if y % 100 == 0:
+        return 0
+    if y % 4 == 0:
+        return 1
+    else:
+        return 0
+        
+#Number of days
+def number_of_days(m, y):
+    if m == 0:
+        return 0
+    if m == 1:
+        return 31
+    if m == 2:
+        leapday = leap_year(y)
+        return 28 + leapday
+    if m == 3:
+        return 31
+    if m == 4:
+        return 30
+    if m == 5:
+        return 31
+    if m == 6:
+        return 30
+    if m == 7:
+        return 31
+    if m == 8:
+        return 31
+    if m == 9:
+        return 30
+    if m == 10:
+        return 31
+    if m == 11:
+        return 30
+    if m == 12:
+        return 31
+#Days Passed Leap
+def days_passed(d, m, y):
+    d = d - 1
+    if m == 1:
+        passeddays = d
+        return passeddays
+    if m == 2:
+        passeddays = 31 + d
+        return passeddays
+    if m == 3:
+        passeddays = 59 + d + leap_year(y)
+        return passeddays
+    if m == 4:
+        passeddays = 90 + d + leap_year(y)
+        return passeddays
+    if m == 5:
+        passeddays = 120 + d + leap_year(y)
+        return passeddays
+    if m == 6:
+        passeddays = 151 + d + leap_year(y)
+        return passeddays
+    if m == 7:
+        passeddays = 181 + d + leap_year(y)
+        return passeddays
+    if m == 8:
+        passeddays = 222 + d + leap_year(y)
+        return passeddays
+    if m == 9:
+        passeddays = 253 + d + leap_year(y)
+        return passeddays
+    if m == 10:
+        passeddays = 283 + d + leap_year(y)
+        return passeddays
+    if m == 11:
+        passeddays = 314 + d + leap_year(y)
+        return passeddays
+    if m == 12:
+        passeddays = 334 + d + leap_year(y)
+        return passeddays
+#Main
+print("Please enter a date")
+day = int(input("Day: "))
+month = int(input("Month: "))
+year = int(input("Year: "))
+#Menu
+print("Menu:")
+print("1) Calculate the number of days in the given month.")
+print("2) Calculate the number of days passed in the given year.")
+menu_select = int(input(""))
+if menu_select == 2:
+    if day > 31 or day < 1:
+        print("Invalid Day.")
+    else:
+        passeddays = days_passed(day, month, year)
+        print(passeddays)
+elif menu_select == 1:
+    calmonth = (number_of_days(month, year))
+    print(calmonth)
