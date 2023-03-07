@@ -1,0 +1,23 @@
+from microbit import * 
+import random
+
+def wait_button():
+    while True:
+        if button_a.was_pressed() or button_b.was_pressed():
+            break
+while True:
+    display.scroll("321")
+    
+    delay_time = random.randrange(1000, 5000)
+    sleep(delay_time)
+    
+    display.show(Image.TARGET)
+    
+    start_time = running_time()
+    
+    wait_button()
+        
+    reaction_time = running_time() - start_time
+    
+    display.scroll(str(reaction_time), loop = True, wait = False)
+    wait_button()
