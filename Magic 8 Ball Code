@@ -1,0 +1,235 @@
+#include <LiquidCrystal_I2C.h>
+#include <Wire.h>
+
+#define randomPin A2
+//this project sucks - Unknown
+
+//Loading Animations Characters
+//Unloaded Characters
+byte unloaded_1[8]={ 
+  B01111,
+  B11000,
+  B10000,
+  B10000,
+  B10000,
+  B10000,
+  B11000,
+  B01111
+};
+byte unloaded_2[8]={
+  B11111,
+  B00000,
+  B00000,
+  B00000,
+  B00000,
+  B00000,
+  B00000,
+  B11111
+};
+byte unloaded_3[8]={
+  B11110,
+  B00011,
+  B00001,
+  B00001,
+  B00001,
+  B00001,
+  B00011,
+  B11110
+};
+//Loaded Characters
+byte loaded_1[8]={
+  B01111,
+  B11000,
+  B10011,
+  B10111,
+  B10111,
+  B10011,
+  B11000,
+  B01111
+};
+byte loaded_2[8]={
+  B11111,
+  B00000,
+  B11111,
+  B11111,
+  B11111,
+  B11111,
+  B00000,
+  B11111
+};
+byte loaded_3[8]={
+  B11110,
+  B00011,
+  B11001,
+  B11101,
+  B11101,
+  B11001,
+  B00011,
+  B11110
+};
+byte first_half[8]={
+  B00011,
+  B00110,
+  B01101,
+  B01110,
+  B01101,
+  B01110,
+  B00111,
+  B00011
+};
+byte second_half[8]={
+  B11000,
+  B01100,
+  B10110,
+  B01110,
+  B10110,
+  B01110,
+  B11100,
+  B11000
+};
+
+String messages[20]={// All the messages possible from a Magic 8 Ball
+  "Cannot predict now.",
+  "Outlook good.",
+  "My sources say no.",
+  "It is certain.",
+  "Yes definitely.",
+  "Very doubtful.",
+  "Better not tell you now.",
+  "As I see it, yes.",
+  "Signs point to yes.",
+  "Don't count on it.",
+  "You may rely on it.",
+  "Outlook not so good.",
+  "Most likely.",
+  "Yes.",
+  "Concentrate and ask again.",
+  "Ask again later.",
+  "My reply is no.",
+  "Without a doubt.",
+  "Reply hazy, try again.",
+  "It is decidedly so."
+};
+
+const int MPU_addr = 0x68;  
+int16_t AcX,AcY,AcZ,Tmp,GyX,GyY,GyZ;
+int accelThresh = 8000;
+
+LiquidCrystal_I2C lcd(0x27,16,2);
+
+void setup(){
+
+  Wire.begin();
+  Wire.beginTransmission(MPU_addr);
+  Wire.write(0x6B);  
+  Wire.write(0);     
+  Wire.endTransmission(true);
+
+  Serial.begin(115200);
+  randomSeed(analogRead(randomPin));
+
+  //Creating all the custom characters
+  lcd.createChar(0,unloaded_1);
+  lcd.createChar(1,unloaded_2);
+  lcd.createChar(2,unloaded_3);
+  lcd.createChar(3,loaded_1);
+  lcd.createChar(4,loaded_2);
+  lcd.createChar(5,loaded_3);
+  lcd.createChar(6,first_half);
+  lcd.createChar(7,second_half);
+
+  lcd.init();
+  lcd.backlight();
+}
+void loop(){
+  lcd.setCursor(0,0);
+  lcd.write(byte(6));
+  lcd.setCursor(1,0);
+  lcd.write(byte(7));
+  lcd.setCursor(2,0);
+  lcd.print("Magic 8 Ball");
+  lcd.setCursor(14,0);
+  lcd.write(byte(6));
+  lcd.setCursor(15,0);
+  lcd.write(byte(7));
+  lcd.setCursor(1,1);
+  lcd.print("Shake to Start");
+  Wire.beginTransmission(MPU_addr);
+  Wire.write(0x3B);  // starting with register 0x3B (ACCEL_XOUT_H)
+  Wire.endTransmission(false);
+  Wire.requestFrom(MPU_addr,14,true);
+  AcX=Wire.read()<<8|Wire.read();   
+  AcY=Wire.read()<<8|Wire.read(); 
+  AcZ=Wire.read()<<8|Wire.read(); 
+  Tmp=Wire.read()<<8|Wire.read();  
+  GyX=Wire.read()<<8|Wire.read();  
+  GyY=Wire.read()<<8|Wire.read(); 
+  GyZ=Wire.read()<<8|Wire.read();  
+
+  if((abs(AcX) > accelThresh) && (abs(AcY) > accelThresh)){
+    lcd.clear();
+    int randomNumber = random(0,20); //generating a Random number
+    delay(200);
+
+    lcd.setCursor(0,0);
+    lcd.print("Analyzing...");
+    //Loading Animations
+    lcd.setCursor(0,1);
+    lcd.write(byte(0));
+    for(int i=1;i<=15;i++){
+      lcd.setCursor(i,1);
+      lcd.write(byte(1));
+      delay(20);
+    }
+    lcd.setCursor(15,1);
+    lcd.write(byte(2));
+    delay(2000);
+
+    lcd.setCursor(0,1);
+    lcd.write(byte(3));
+    delay(1000);
+    for(int i=1;i<=14;i++){
+      lcd.setCursor(i,1);
+      lcd.write(byte(4));
+      delay(500);
+    }
+    lcd.setCursor(15,1);
+    lcd.write(byte(5));
+    delay(1000);
+    lcd.clear();
+    delay(1000);
+
+    lcd.setCursor(0,0);
+    String message = messages[randomNumber];
+    int len = message.length();
+    lcd.print(messages[randomNumber]);
+    delay(500);
+    if(len > 16){
+      for(int i =0;i<len;i++){
+        lcd.scrollDisplayLeft();
+        delay(500);
+      }
+    }
+    else{
+      delay(1000);
+    }
+    lcd.clear();
+    lcd.setCursor(0, 0);
+    lcd.print("Resetting");
+    delay(500);
+    lcd.setCursor(0,0);
+    lcd.print("Resetting.");
+    delay(500);
+    lcd.setCursor(0,0);
+    lcd.print("Resetting..");
+    delay(500);
+    lcd.setCursor(0,0);
+    lcd.print("Resetting...");
+    delay(500);
+    lcd.clear();
+  }
+  delay(500);
+  lcd.setCursor(1,1);
+  lcd.print("                ");
+  delay(500);
+}
